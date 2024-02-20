@@ -17,15 +17,12 @@ def get_pin_color(name_institute):
     return color_mapping.get(name_institute, "gray")
 
 def create_map(filtered_data):
-    # Criando um mapa com Folium
     map_obj = folium.Map(location=[filtered_data[0]['latitude'], filtered_data[0]['longitude']], zoom_start=10)
 
-    # Adicionando marcadores para cada estação no mapa
     for station in filtered_data:
         lat, lon = float(station['latitude']), float(station['longitude'])
         popup_text = f"Nome: {station['name']}\nCódigo: {station['code']}\nTipo: {station['type']}"
         
-        # Obtendo a cor do pin com base no nome do instituto
         pin_color = get_pin_color(station['name_institute'])
         
         folium.Marker([lat, lon], popup=popup_text, icon=folium.Icon(color=pin_color)).add_to(map_obj)
@@ -51,7 +48,6 @@ def return_map():
         filtered_data = [station for station in data if station['name_institute'] in selected_institutes]
 
         if filtered_data:
-            # Chamando a função do mapa para exibir no Streamlit
             display_map(filtered_data)
         else:
             st.warning("Nenhuma estação encontrada para os institutos selecionados.")
