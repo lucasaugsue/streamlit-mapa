@@ -1,5 +1,10 @@
 import folium
 import streamlit_folium as stf
+import streamlit as st
+import requests
+
+api_url = "http://54.159.5.19:3000/stations"
+response = requests.get(api_url)
 
 def get_pin_color(name_institute):
     color_mapping = {
@@ -31,3 +36,25 @@ def display_map(filtered_data):
     # Exibindo o mapa no Streamlit usando st_folium
     st_folium = stf.st_folium(create_map(filtered_data))
     st_folium
+
+def filtro_institutos(data):
+    all_institutes = sorted(set(station['name_institute'] for station in data))
+    list_filtered = st.sidebar.multiselect("Selecione os institutos", all_institutes, default=all_institutes)
+    return list_filtered
+
+def return_map():
+    if response.status_code == 200:
+        data = response.json()
+
+        selected_institutes = filtro_institutos(data)
+
+        filtered_data = [station for station in data if station['name_institute'] in selected_institutes]
+
+        if filtered_data:
+            # Chamando a função do mapa para exibir no Streamlit
+            display_map(filtered_data)
+        else:
+            st.warning("Nenhuma estação encontrada para os institutos selecionados.")
+
+    else:
+        st.error(f"Falha ao carregar dados da API. Código de status: {response.status_code}")
